@@ -10,8 +10,6 @@ import (
 
 var count int
 
-//var sources []string
-
 // loadCmd represents the load command
 var loadCmd = &cobra.Command{
 	Use:   "load host... [ -c count ]",
