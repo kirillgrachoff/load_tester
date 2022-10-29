@@ -6,13 +6,13 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"sync"
+
+	"golang.org/x/sync/errgroup"
 
 	"github.com/kirillgrachoff/load_tester/pkg/net/xhttp"
 )
 
 type MultiGet struct {
-	wg    sync.WaitGroup
 	count int
 	url   []string
 	r     *rand.Rand
@@ -31,31 +31,35 @@ func NewClient(count int, url []string) *MultiGet {
 	}
 }
 
-func (g *MultiGet) Run(ctx context.Context) error {
-	g.wg.Add(g.count)
+func (g *MultiGet) Run(ctx context.Context) (err error) {
+	group, ctx := errgroup.WithContext(ctx)
 
 	for i := 0; i < g.count; i++ {
 		logger := log.New(os.Stdout, fmt.Sprintf("(index: %4d) ", i+1), log.Flags())
-		go g.worker(ctx, logger)
+		group.Go(func() error {
+			return g.worker(ctx, logger)
+		})
 	}
 
-	g.wg.Wait()
-	return nil
+	err = group.Wait()
+	if ctx.Err() != nil {
+		log.Println(ctx.Err())
+	}
+	return
 }
 
-func (g *MultiGet) worker(ctx context.Context, logger Logger) {
-	defer g.wg.Done()
+func (g *MultiGet) worker(ctx context.Context, logger Logger) error {
 	logger.Printf("start querying")
 	count := 0
 	for {
 		index := g.r.Intn(len(g.url))
 		select {
 		case <-ctx.Done():
-			return
+			return nil
 		case resp := <-xhttp.Get(g.url[index]):
 			if resp.Err != nil {
 				logger.Printf("error while query: %s | time: %s", resp.Err, resp.Time)
-				return
+				return resp.Err
 			}
 			count++
 			logger.Printf("total count: %6d | status: %s | time: %s", count, resp.Response.Status, resp.Time)
