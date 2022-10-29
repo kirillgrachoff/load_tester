@@ -1,7 +1,10 @@
 package cmd
 
 import (
-	"os"
+	"context"
+	"log"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 )
@@ -11,20 +14,15 @@ var rootCmd = &cobra.Command{
 	Use:   "load_tester",
 	Short: "Simple app for load test",
 	Long:  "Sends many Get requests to an address",
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGKILL)
+	defer cancel()
+	err := rootCmd.ExecuteContext(ctx)
 	if err != nil {
-		os.Exit(1)
+		log.Printf("error: %s", err)
 	}
-}
-
-func init() {
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
