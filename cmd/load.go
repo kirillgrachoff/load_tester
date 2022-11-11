@@ -9,6 +9,7 @@ import (
 )
 
 var count int
+var keepAlive bool
 
 // loadCmd represents the load command
 var loadCmd = &cobra.Command{
@@ -20,7 +21,7 @@ var loadCmd = &cobra.Command{
 			return errors.New("sources not specified")
 		}
 
-		client := multi_get.NewClient(count, args, true)
+		client := multi_get.NewClient(count, args, keepAlive)
 		return client.Run(cmd.Context())
 	},
 }
@@ -28,4 +29,5 @@ var loadCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(loadCmd)
 	loadCmd.Flags().IntVarP(&count, "count", "c", 10, "parallel GETs count")
+	loadCmd.Flags().BoolVarP(&keepAlive, "keep-alive", "a", false, "do not close connection")
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"time"
 
 	"golang.org/x/sync/errgroup"
 
@@ -61,6 +62,7 @@ func (g *MultiGet) worker(ctx context.Context, logger Logger) error {
 		case resp := <-xhttp.Get(g.url[index]):
 			if resp.Err != nil {
 				logger.Printf("total count: %6d | error while query: %s | time: %s", count, resp.Err, resp.Time)
+				time.Sleep(time.Second)
 			} else {
 				if !g.keepAlive {
 					resp.Response.Body.Close()
