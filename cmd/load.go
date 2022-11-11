@@ -20,7 +20,7 @@ var loadCmd = &cobra.Command{
 			return errors.New("sources not specified")
 		}
 
-		client := multi_get.NewClient(count, args)
+		client := multi_get.NewClient(count, args, true)
 		return client.Run(cmd.Context())
 	},
 }

@@ -13,9 +13,10 @@ import (
 )
 
 type MultiGet struct {
-	count int
-	url   []string
-	r     *rand.Rand
+	count     int
+	url       []string
+	keepAlive bool
+	r         *rand.Rand
 }
 
 type Logger interface {
@@ -23,11 +24,12 @@ type Logger interface {
 	Printf(format string, args ...any)
 }
 
-func NewClient(count int, url []string) *MultiGet {
+func NewClient(count int, url []string, keepAlive bool) *MultiGet {
 	return &MultiGet{
-		count: count,
-		url:   url,
-		r:     rand.New(rand.NewSource(42)),
+		count:     count,
+		url:       url,
+		keepAlive: keepAlive,
+		r:         rand.New(rand.NewSource(42)),
 	}
 }
 
@@ -60,7 +62,9 @@ func (g *MultiGet) worker(ctx context.Context, logger Logger) error {
 			if resp.Err != nil {
 				logger.Printf("total count: %6d | error while query: %s | time: %s", count, resp.Err, resp.Time)
 			} else {
-				resp.Response.Body.Close()
+				if !g.keepAlive {
+					resp.Response.Body.Close()
+				}
 				logger.Printf("total count: %6d | status: %s | time: %s", count, resp.Response.Status, resp.Time)
 			}
 			count++
