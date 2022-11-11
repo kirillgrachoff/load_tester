@@ -58,11 +58,11 @@ func (g *MultiGet) worker(ctx context.Context, logger Logger) error {
 			return nil
 		case resp := <-xhttp.Get(g.url[index]):
 			if resp.Err != nil {
-				logger.Printf("error while query: %s | time: %s", resp.Err, resp.Time)
-				return resp.Err
+				logger.Printf("total count: %6d | error while query: %s | time: %s", count, resp.Err, resp.Time)
+			} else {
+				logger.Printf("total count: %6d | status: %s | time: %s", count, resp.Response.Status, resp.Time)
 			}
 			count++
-			logger.Printf("total count: %6d | status: %s | time: %s", count, resp.Response.Status, resp.Time)
 		}
 	}
 }
