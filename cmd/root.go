@@ -14,7 +14,7 @@ var rootCmd = &cobra.Command{
 	Use:     "load_tester",
 	Short:   "Simple app for load test",
 	Long:    "Sends many Get requests to an address",
-	Version: "1.1.2",
+	Version: "1.1.3",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

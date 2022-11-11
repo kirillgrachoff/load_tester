@@ -60,6 +60,7 @@ func (g *MultiGet) worker(ctx context.Context, logger Logger) error {
 			if resp.Err != nil {
 				logger.Printf("total count: %6d | error while query: %s | time: %s", count, resp.Err, resp.Time)
 			} else {
+				resp.Response.Body.Close()
 				logger.Printf("total count: %6d | status: %s | time: %s", count, resp.Response.Status, resp.Time)
 			}
 			count++
